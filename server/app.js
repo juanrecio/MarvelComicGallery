@@ -34,7 +34,7 @@ app.use(cookieParser());
 
 app.use(cors({
   credentials: true,
-  origin:"http://localhost:3000"
+  origin: process.env.CLIENT_URL
 }))
 
 // Enable authentication using session + passport
