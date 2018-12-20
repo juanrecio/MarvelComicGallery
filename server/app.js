@@ -52,5 +52,9 @@ require('./passport')(app);
 const index = require('./routes/index');
 app.use('/', index);
 
+app.use((req, res, next) => {
+  // If no routes match, send them the React HTML.
+  res.sendFile(__dirname + "/public/index.html");
+});
 
 module.exports = app;
