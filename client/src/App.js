@@ -1,21 +1,25 @@
 import React, { Component } from 'react';
 import { Route, Link, Switch } from "react-router-dom";
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
-import CharacterCards from './components/Characters/CharacterCards'
-import ComicCards from './components/Comics/ComicCards'
-import AuthService from "./javascripts/AuthService"
-import Signup from './components/Users/Signup'
-import Login from './components/Users/Login'
+import CharacterCards from './components/Characters/CharacterCards';
+import ComicCards from './components/Comics/ComicCards';
+import AuthService from "./javascripts/AuthService";
+import Signup from './components/Users/Signup';
+import Login from './components/Users/Login';
 import CharacterPage from './components/Characters/CharacterPage';
 import ComicPage from './components/Comics/ComicPage';
+import ListPage from './components/Lists/ListPage';
+import Header from './components/Header';
+import Home from './components/Home';
 
-
+const UserContext = React.createContext();
 
 class App extends Component {
+  
+
   constructor() {
     super();
-
     this.state = {
       user: null
     };
@@ -38,24 +42,29 @@ class App extends Component {
   logout = () => {
     this.authService
       .logout()
-      .then(() => this.setState({ ...this.state, user: null }));
+      .then(() => {
+        this.setState({ ...this.state, user: null })
+      });
   };
 
-  
-  
+
+
   render() {
     const welcome = this.state.user ? (
+      <UserContext.Provider value={this.state.user}>
       <div>
-        <p>Hola {this.state.user.username}</p>
-        <button onClick={this.logout}>Logout</button>
+        <Header logoutFunction={this.logout} user={this.state.user} />
         <Switch>
           <Route path="/cogetUser={this.getUser} mics" render={() => <ComicCards getUser={this.getUser} />} />
-          <Route path="/characters/:id" render={(props) => <CharacterPage user={this.state.user} {...props}/>} />
-          <Route path="/characters" render={() => <CharacterCards user={this.state.user} characters={{limit:"5", sortBy:"favs"}} />} />
+          <Route path="/characters/:id" render={(props) => <CharacterPage user={this.state.user} {...props} />} />
+          <Route path="/characters" render={() => <CharacterCards user={this.state.user} characters={{ limit: "5", sortBy: "favs" }} />} />
+          <Route path="/lists/:id" render={(props) => <ListPage user={this.state.user} {...props} />} />
           <Route path="/comics/:id" render={(props) => <ComicPage user={this.state.user} {...props} />} />
-          <Route path="/comics" render={() => <ComicCards user={this.state.user} comics={{limit:"20", sortBy:"latest"}} />} />
+          <Route path="/comics" render={() => <ComicCards user={this.state.user} comics={{ limit: "20", sortBy: "latest" }} />} />
+          <Route exact path="/" render={() => <Home user={this.state.user} />} />
         </Switch>
       </div>
+      </UserContext.Provider>
     ) : (
         <div>
           <p>No user</p>
@@ -79,4 +88,5 @@ class App extends Component {
 
 }
 
+export { UserContext };
 export default App; 

@@ -20,9 +20,9 @@ class marvelAPIHandler {
 
   getCharacterById(id) {
     return this.service.get(`characters?id=${id}&${this.getAuth()}`)
-    .then(response =>
-      response.data)
-    .catch(err => console.log(err))
+      .then(response =>
+        response.data)
+      .catch(err => console.log(err))
   }
 
 
@@ -42,15 +42,15 @@ class marvelAPIHandler {
       .catch(err => console.log(err));
   }
 
-  getComicById(id){
+  getComicById(id) {
     return this.service.get(`comics?id=${id}&${this.getAuth()}`)
-    .then(response=>response.data)
-    .catch(err=>console.log(err))
+      .then(response => response.data)
+      .catch(err => console.log(err))
   }
 
-  getComics({limit=100,sortBy,id}){
-    const sortedBy={
-      latests: "dateDescriptor=thisWeek&orderBy=-onsaleDate&"
+  getComics({ limit = 100, sortBy, id }) {
+    const sortedBy = {
+      latests: "dateDescriptor=thisMonth&orderBy=-onsaleDate&offset=50"
     }
     let query = id ?
       `/${id}`
@@ -64,12 +64,11 @@ class marvelAPIHandler {
         console.log(err)
       })
   }
-  
+
   getAuth() {
     let ts = Math.floor(Math.random() * 100000).toString();
     let hash = md5(ts + process.env.MARVEL_PRIVATE_KEY + process.env.MARVEL_PUBLIC_KEY);
     return (`ts=${ts}&apikey=${process.env.MARVEL_PUBLIC_KEY}&hash=${hash}`);
-
   }
 
 }

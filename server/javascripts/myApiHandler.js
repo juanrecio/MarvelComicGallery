@@ -1,44 +1,41 @@
 
-const Character = require('../models/Character')
+const Character = require('../models/Character');
 
-const Comic = require('../models/Comic')
-const List = require('../models/List')
+const Comic = require('../models/Comic');
+const List = require('../models/List');
+const User = require('../models/User');
 
-const marv = require("../javascripts/marvelApiHandler");
-const marvelApi = new marv();
+
+const Marv = require('../javascripts/marvelApiHandler');
 
 
 class myApiHandler {
+  constructor() {
+    this.marvelApi = new Marv();
+  }
 
   getCharacterById(extId, full) {
-    return Character.findOne({ extId: extId })
-      .then(inChar => {
-        if (full != "true") {
-          return inChar
+    return Character.findOne({ extId })
+      .then((inChar) => {
+        if (full !== 'true') {
+          return inChar;
         }
-
-        else {
-          return marvelApi.getCharacterById(extId)
-            .then(extChar => {
-              extChar = extChar.data.results[0];
-              return ({ name: inChar.name, extId: inChar.extId, favs: inChar.favs, img: inChar.img, description: extChar.description, comics: extChar.comics, series: extChar.series, events: extChar.events })
-            })
-        }
-      })
+        return this.marvelApi.getCharacterById(extId)
+          .then((extChar) => {
+            [extChar, ...rest] = extChar.data.results;
+            return ({
+              name: inChar.name, extId: inChar.extId, favs: inChar.favs, img: inChar.img, description: extChar.description, comics: extChar.comics, series: extChar.series, events: extChar.events,
+            });
+          });
+      });
   }
 
 
-  getCharacters({ sortBy = "", limit = Number.MAX_SAFE_INTEGER, ...searchObject }) {
-    //TODO: Check sort
-    return Character.find(searchObject).limit(parseInt(limit))
-      .then(chars => {
-        if (sortBy === "favs") {
-          chars = Array.from(chars).sort((a, b) => {
-            return a.favs.length > b.favs.length;
-          })
-        }
-        return (chars);
-      }
+  getCharacters({ sortBy = "name", order = 1, limit = Number.MAX_SAFE_INTEGER, ...searchObject }) {
+    return Character.find(searchObject)
+      .sort({ [sortBy]: order })
+      .limit(parseInt(limit))
+      .then(chars => chars
       )
   }
 
@@ -47,7 +44,7 @@ class myApiHandler {
     //entonces separar para no llamar siempre a la API externa
     return Comic.findOne({ extId: extId })
       .then(inComic => {
-        return marvelApi.getComicById(extId)
+        return this.marvelApi.getComicById(extId)
           .then(extComic => {
             extComic = extComic.data.results[0];
             if (!inComic) extComic.favs = [];
@@ -58,9 +55,8 @@ class myApiHandler {
       .catch(err => err)
   }
 
-  // getComics({ sortBy = "", limit = Number.MAX_SAFE_INTEGER, ...searchObject }) {
   getComics(comicsSelector) {
-    return marvelApi.getComics(comicsSelector)
+    return this.marvelApi.getComics(comicsSelector)
       .then(c => c.data.results)
       .catch(err => console.log(err))
   }
@@ -71,29 +67,60 @@ class myApiHandler {
       .catch(err => console.log(err));
   }
 
-  createList(name, userId) {
-    return List.add(name, userId)
+  createList(listObject) {
+    return List.add(listObject)
       .then(c => c)
       .catch(err => console.log(err))
   }
 
+  addFavToCharacter({ characterId, userId }) {
+    return Character.findById(characterId)
+      .then(char => {
+        userId += "";
+        if (!char.favs.includes(userId)) {
+          char.favs.push(userId);
+          char.nFavs++;
+          return Character.findByIdAndUpdate(characterId, char)
+            .then(c => c.data)
+            .catch(err => console.log(err))
+        }
+        else return char
+      }
+      )
+  }
+
+  removeFavFromCharacter({ characterId, userId }) {
+    return Character.findById(characterId)
+      .then(char => {
+        let index = char.favs.indexOf(userId);
+        if (index > -1) {
+          char.favs.splice(index, 1);
+          char.nFavs--;
+          return Character.findByIdAndUpdate(characterId, char)
+            .then(c => c.data)
+            .catch(err => console.log(err))
+        }
+        else return char
+      })
+  }
 
 
   addFavToComic({ comicId, userId }) {
     return Comic.findOne({ extId: comicId })
       .then(comic => {
-        if(comic){
-        if (!comic.favs.includes(userId)) {
-          comic.favs.push(userId);
-          return Comic.findOneAndUpdate({ extId: comicId }, comic)
-            .then(c => c.data)
-            .catch(err => console.log(err))
+        if (comic) {
+          if (!comic.favs.includes(userId)) {
+            comic.favs.push(userId);
+            return Comic.findOneAndUpdate({ extId: comicId }, comic)
+              .then(c => c.data)
+              .catch(err => console.log(err))
+          }
+          else return comic
         }
-        else return comic}
         else {
-            return Comic.add(comicId,userId)
+          return Comic.add(comicId, userId)
         }
-        
+
       })
   }
 
@@ -124,6 +151,7 @@ class myApiHandler {
         else return list
       })
   }
+
   removeFavFromList({ listId, userId }) {
     return List.findById(listId)
       .then(list => {
@@ -141,8 +169,34 @@ class myApiHandler {
   addComicToList({ listId, comicId }) {
     return List.findById(listId)
       .then(list => {
+        console.log("incluye:", list.comics.includes(comicId))
         if (!list.comics.includes(comicId)) {
-          list.favs.push(comicId);
+          list.comics.push(comicId);
+          return List.findByIdAndUpdate(listId, list)
+            .then(c => c)
+            .catch(err => console.log(err))
+        }
+        else return list
+      })
+  }
+
+  addComicToNewList({ comicId, userId }) {
+    return User.findById(userId)
+      .then(user => {
+        if (!user.comicUnwantedList.includes(comicId)) {
+          user.comicUnwantedList.push(comicId)
+        }
+        return (user.comicUnwantedList);
+      })
+      .catch(err => console.log(err));
+  }
+
+  removeComicFromList({ listId, comicId }) {
+    return List.findById(listId)
+      .then(list => {
+        let index = list.comics.indexOf(comicId);
+        if (index > -1) {
+          list.comics.splice(index, 1);
           return List.findByIdAndUpdate(listId, list)
             .then(c => c.data)
             .catch(err => console.log(err))
@@ -151,18 +205,17 @@ class myApiHandler {
       })
   }
 
-  removeComicFromList({ listId, comicId }) {
+  getList(listId) {
     return List.findById(listId)
-      .then(list => {
-        let index = list.favs.indexOf(comicId);
-        if (index > -1) {
-          list.favs.splice(index, 1);
-          return List.findByIdAndUpdate(listId, list)
-            .then(c => c.data)
-            .catch(err => console.log(err))
-        }
-        else return list
-      })
+      .then(list => list)
+      .catch(err => console.log(err))
+  }
+
+  getLists({ sortBy = "name", order = 1, limit = Number.MAX_SAFE_INTEGER, ...searchObject }) {
+    return List.find(searchObject)
+      .sort({ [sortBy]: order })
+      .limit(parseInt(limit))
+      .then(lists => lists)
   }
 
   deleteList(listId) {

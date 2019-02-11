@@ -3,10 +3,11 @@ const Schema   = mongoose.Schema;
 
 const listSchema = new Schema({
   name: {type:String, required:true},
-  comics: {type: [Number],required:true, default:[]},
+  comics: {type: [Schema.Types.ObjectId], ref: "Comic" ,default:[]},
   userId: { type: Schema.Types.ObjectId, ref: "User" },
   favs: { type: [Schema.Types.ObjectId], ref: "User" ,default:[]},
-  character: {type: [Number]}
+  nFavs: {type:Number, default:0},
+  characters: {type: [Schema.Types.ObjectId], ref: "Character" ,default:[]}
 }, {
   timestamps: {
     createdAt: 'created_at',
@@ -15,8 +16,8 @@ const listSchema = new Schema({
 });
 const List = mongoose.model('List', listSchema);
 
-List.add = function(name,userId){
-  return List.create({name: name,userId: userId,favs:[userId]})
+List.add = function({name,userId,character=[]}){
+  return List.create({name: name,userId: userId,favs:[userId],nFavs:1,character:character})
   .then(c=>c.data)
   .catch(err=>console.log(err));
 }

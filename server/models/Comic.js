@@ -4,6 +4,7 @@ const Schema   = mongoose.Schema;
 const comicSchema = new Schema({
   extId: {type: Number,required:true},
   favs: { type: [Schema.Types.ObjectId], ref: "User" },
+  nFavs: {type:Number, default:1}
 }, {
   timestamps: {
     createdAt: 'created_at',

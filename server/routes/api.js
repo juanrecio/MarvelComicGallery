@@ -18,7 +18,7 @@ apiRoutes.get("/characters", function (req, res, next) {
     .catch(err => console.log(err))
 });
 
-
+  
 apiRoutes.get("/characters/:id", function (req, res, next) {
   myApi.getCharacterById(req.params.id, req.query.full)
     .then(c => {
@@ -43,7 +43,7 @@ apiRoutes.get("/comics", function (req, res, next) {
     .catch(err => console.log(err))
 })
 
-
+//TODO: query or body?
 apiRoutes.patch("/comics/:id", function (req, res, next) {
   const operations = {
     "addFav": "addFavToComic",
@@ -57,14 +57,37 @@ apiRoutes.patch("/comics/:id", function (req, res, next) {
     .catch(err => console.log(err))
 });
 
-apiRoutes.put("/list", function (req, res, next) {
-  const { name, userId } = req.query;
-  myApi.createList(name, userId)
-    .then(list => res.status(200).json(list))
+//TODO: query or body?
+apiRoutes.patch("/characters/:id", function (req, res, next) {
+  const operations = {
+    "addFav": "addFavToCharacter",
+    "removeFav": "removeFavFromCharacter"
+  }
+  const { op, ...object } = req.query;
+
+  object.characterId = req.params.id;
+  return myApi[operations[op]](object)
+    .then(c => res.status(200).json(c))
     .catch(err => console.log(err))
 });
 
-apiRoutes.patch("/list/:id", function (req, res, next) {
+apiRoutes.get("/lists/:id",function (req,res,next){
+  return myApi.getList(req.params.id)
+  .then(list=>res.status(200).json(list));
+});
+// /${characterId}?op=${(isFav ? "removeFav" : "addFav")}&userId=${userId}`
+//     return this.service.patch(`/characters${query}`)
+
+//TODO: body!
+apiRoutes.put("/lists", function (req, res, next) {
+  myApi.createList(req.body)
+  .then(list => res.status(200).json(list))
+  .catch(err => console.log(err))
+});
+
+
+//TODO: query or body?
+apiRoutes.patch("/lists/:id", function (req, res, next) {
   const operations = {
     "addFav": "addFavToList",
     "removeFav": "removeFavFromList",
@@ -74,11 +97,19 @@ apiRoutes.patch("/list/:id", function (req, res, next) {
   const { op, ...object } = req.body;
   object.listId = req.params.id;
   return myApi[operations[op]](object)
-    .then(c => res.status(200).json(c))
-    .catch(err => console.log(err))
+  .then(c => res.status(200).json(c))
+  .catch(err => console.log(err))
 });
 
-apiRoutes.delete("/list/:id", function (req, res, next) {
+apiRoutes.get("/lists", function (req, res, next) {
+  myApi.getLists(req.query)
+    .then(c => {
+      res.status(200).json(c)
+    })
+    .catch(err => console.log(err))
+})
+
+apiRoutes.delete("/lists/:id", function (req, res, next) {
   return myApi.deleteList(req.params.id)
     .then(c => res.status(200).json(c))
     .catch(err => console.log(err))

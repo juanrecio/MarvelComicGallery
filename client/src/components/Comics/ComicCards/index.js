@@ -1,3 +1,3 @@
-import ComicCards from './ComicCards'
+import ComicCards from '../ComicCards'
 
 export default ComicCards

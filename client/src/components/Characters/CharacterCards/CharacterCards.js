@@ -1,13 +1,33 @@
-import AuthService from '../../../javascripts/AuthService';
 import React, { Component } from 'react'
-import './CharacterCards.css'
-import ApiService from '../../../javascripts/apiService'
 import CharacterCard from './CharacterCard'
-require('dotenv').config()
+import { withStyles } from '@material-ui/core/styles';
+import GridList from '@material-ui/core/GridList';
+import ApiService from '../../../javascripts/apiService'
+import './CharacterCards.css'
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import IconButton from '@material-ui/core/IconButton';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 
 
-export default class CharacterCards extends Component {
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  gridList: {
+    flexWrap: 'nowrap',
+    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+    transform: 'translateZ(0)',
+  },
+});
+
+class CharacterCards extends Component {
   constructor() {
     super();
     this.apiService = new ApiService();
@@ -22,21 +42,33 @@ export default class CharacterCards extends Component {
 
   componentDidMount() {
     this.getCharacters(this.props.characters)
-    .then(() =>this.setState({ ...this.state, user: this.props.user }))
-      .catch(err=>console.log(err))
+      .then(() => this.setState({ ...this.state, user: this.props.user }))
+      .catch(err => console.log(err))
   }
-
-
   render() {
-    return (this.state.characters ?
-      <div className="characters-cards">
-        {(this.state.characters.map((charac, index) => {
-          return <CharacterCard character={charac} key={index} />
-        }))}
-      </div>
+    const { classes } = this.props;
+    return (this.state.characters && this.state.user?
+      <Card className={classes.card}>
+        <CardHeader
+          action={
+            <IconButton>
+              <MoreVertIcon />
+            </IconButton>
+          }
+          title="Characters"
+          style={{textAlign: "left"}}/ >
+        <div className={classes.root}>
+          <GridList className={classes.gridList} cols={2.5}>
+            {(this.state.characters.map((charac, index) => {
+              return <CharacterCard character={charac} key={index} user={this.state.user}/>
+            }))}
+          </GridList>
+        </div>
+      </Card>
       : <div>
         <p>Loading...</p>
-      </div>
-    )
+      </div>)
   }
 }
+
+export default withStyles(styles)(CharacterCards);

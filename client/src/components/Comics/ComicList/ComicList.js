@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import './ComicCards.css'
+import './ComicList.css'
 import { withStyles } from '@material-ui/core/styles';
 import GridList from '@material-ui/core/GridList';
-import ComicCard from './ComicCard'
+import ComicCard from '../ComicCards/ComicCard'
 import ApiService from '../../../javascripts/apiService'
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -24,7 +24,7 @@ const styles = theme => ({
   },
 });
 
-class ComicCards extends Component {
+class ComicList extends Component {
   constructor() {
     super();
     this.apiService = new ApiService();
@@ -71,4 +71,4 @@ class ComicCards extends Component {
   }
 }
 
-export default withStyles(styles)(ComicCards);
+export default withStyles(styles)(ComicList);

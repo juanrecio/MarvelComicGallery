@@ -24,7 +24,7 @@ marvelApi.getAllCharactersPromises()
     Promise.all(promises)
       .then(valuesSet => {
         valuesSet.forEach(values => {
-          values.forEach(value => {
+           values.forEach(value => {
             characters.push({ extId: value.id, name: value.name, img: value.thumbnail })
           })
         });

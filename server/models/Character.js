@@ -3,9 +3,10 @@ const Schema   = mongoose.Schema;
 
 const characterSchema = new Schema({
   extId: {type: Number,required:true,unique:true},
-  name: {type: String,required:true,unique:true},
+  name: {type: String,required:true},
   img: {path :String, extension:String},
   favs: { type: [Schema.Types.ObjectId], ref: "User" ,default:[]},
+  nFavs: {type:Number, default:0}
 }, {
   timestamps: {
     createdAt: 'created_at',
