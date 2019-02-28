@@ -12,11 +12,13 @@ import ComicPage from './components/Comics/ComicPage';
 import ListPage from './components/Lists/ListPage';
 import Header from './components/Header';
 import Home from './components/Home';
+import { Api } from './javascripts/apiService';
 
 const UserContext = React.createContext();
+const ApiContext = React.createContext();
 
 class App extends Component {
-  
+
 
   constructor() {
     super();
@@ -52,18 +54,20 @@ class App extends Component {
   render() {
     const welcome = this.state.user ? (
       <UserContext.Provider value={this.state.user}>
-      <div>
-        <Header logoutFunction={this.logout} user={this.state.user} />
-        <Switch>
-          <Route path="/cogetUser={this.getUser} mics" render={() => <ComicCards getUser={this.getUser} />} />
-          <Route path="/characters/:id" render={(props) => <CharacterPage user={this.state.user} {...props} />} />
-          <Route path="/characters" render={() => <CharacterCards user={this.state.user} characters={{ limit: "5", sortBy: "favs" }} />} />
-          <Route path="/lists/:id" render={(props) => <ListPage user={this.state.user} {...props} />} />
-          <Route path="/comics/:id" render={(props) => <ComicPage user={this.state.user} {...props} />} />
-          <Route path="/comics" render={() => <ComicCards user={this.state.user} comics={{ limit: "20", sortBy: "latest" }} />} />
-          <Route exact path="/" render={() => <Home user={this.state.user} />} />
-        </Switch>
-      </div>
+        <ApiContext.Provider value={Api}>
+          <div>
+            <Header logoutFunction={this.logout} user={this.state.user} />
+            <Switch>
+              <Route path="/cogetUser={this.getUser} mics" render={() => <ComicCards getUser={this.getUser} />} />
+              <Route path="/characters/:id" render={(props) => <CharacterPage user={this.state.user} {...props} />} />
+              <Route path="/characters" render={() => <CharacterCards user={this.state.user} characters={{ limit: "5", sortBy: "favs" }} />} />
+              <Route path="/lists/:id" render={(props) => <ListPage user={this.state.user} {...props} />} />
+              <Route path="/comics/:id" render={(props) => <ComicPage user={this.state.user} {...props} />} />
+              <Route path="/comics" render={() => <ComicCards user={this.state.user} comics={{ limit: "20", sortBy: "latest" }} />} />
+              <Route exact path="/" render={() => <Home user={this.state.user} />} />
+            </Switch>
+          </div>
+        </ApiContext.Provider>
       </UserContext.Provider>
     ) : (
         <div>
@@ -88,5 +92,5 @@ class App extends Component {
 
 }
 
-export { UserContext };
+export { UserContext, ApiContext };
 export default App; 

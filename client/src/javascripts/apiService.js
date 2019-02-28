@@ -98,5 +98,6 @@ class ApiService {
       .catch(err => console.log(err))
   }
 }
+export const Api = new ApiService();
 
 export default ApiService;

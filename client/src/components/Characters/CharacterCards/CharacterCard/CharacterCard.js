@@ -7,9 +7,7 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-import ApiService from '../../../../javascripts/apiService'
-import { UserContext } from '../../../../App'
-
+import { UserContext, ApiContext } from '../../../../App'
 
 
 const styles = theme => ({
@@ -29,7 +27,7 @@ function CharacterCard(props) {
   const [user, setUser] = useState(useContext(UserContext));
   const [character, setCharacter] = useState(null);
   const [fav, setFav] = useState({ nFavs: 0, isFav: false });
-  const [apiService, setApiService] = useState(new ApiService());
+  const [apiService, setApiService] = useState(useContext(ApiContext));
 
   useEffect(() => {
     if (user && !character && props.character) {
